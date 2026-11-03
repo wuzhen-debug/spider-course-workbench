@@ -1,0 +1,15 @@
+export interface XianyuStatus { ready:boolean; mode:string; brand_name:string; publishing_enabled:boolean; manual_publish_enabled?:boolean; shipping_enabled:boolean; auto_reply_enabled:boolean; scheduler_running:boolean; }
+export interface XianyuAccount { account_id:string; display_name:string; brand_id:string; login_confirmed_at:string|null; connection_status:string; automation_enabled:boolean; }
+export interface XianyuMaterial { package_id:number; file_id:number; platform_pair_id?:number|null; title:string; university:string; course_code:string; term:string; material_type:string; page_count:number; preview_pages:number[]; image_count:number; brand_name:string; source_stale:boolean; source_status:string; sha256:string; }
+export interface XianyuImage { sha256:string; page:number; width:number; height:number; }
+export interface XianyuDraft { id:number; title:string; description:string; price:string|null; delivery_note:string; account_id:string|null; brand_id:string; row_version:number; images:XianyuImage[]; source:{filename:string;university:string;course_code:string;term:string;page_count:number;sha256:string;package_id:number;source_status:string;file_id?:number;platform_pair_id?:number;preview_brand?:{name:string}}; created_at:string; updated_at:string; status:string; published:boolean; review_required:boolean; publishing_supported?:boolean; publication?:XianyuPublication|null; }
+export interface XianyuLogin { session_id?:string; status:string; qr_code_url?:string; account_id?:string; verification_url?:string|null; message?:string; }
+
+export interface XianyuPublication { id:string; state:'uploading'|'submitting'|'failed'|'unknown'|'accepted'|'succeeded'; message:string; draft_version:number; upload_count:number; item_id:string|null; item_url:string|null; verification?:{verified:boolean}|null; created_at:string; updated_at:string; }
+export interface XianyuCategory { cat_id:string; cat_name:string; channel_cat_id:string; channel_cat_name:string; tb_cat_id:string; leaf_id:string; selected:boolean; }
+export interface XianyuProperty { property_id:string; property_name:string; required:boolean; multiple:boolean; options:{value_name:string}[]; }
+export interface XianyuCapability { mode:string; commission:{commissionTitle:string; commissionTips:string; percent:string; tipUrl:string}; }
+export interface XianyuPublishOptions { id:string; categories:XianyuCategory[]; properties:XianyuProperty[]; capability:XianyuCapability; }
+export interface XianyuLocation { id:string; label:string; dto:{poiName:string}; }
+export interface XianyuPublishState { enabled:boolean; publication:XianyuPublication|null; options:XianyuPublishOptions|null; locations:XianyuLocation[]; preferred_location_query:string; }
+export interface XianyuPublishPreview { id:string; expires_at:string; notice:string; snapshot:{draft:XianyuDraft; capability:XianyuCapability; settings:{category:XianyuCategory; location:XianyuLocation; attributes:{property_name:string; value_name:string}[]; quantity:number}; }; }

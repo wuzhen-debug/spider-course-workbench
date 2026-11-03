@@ -1,0 +1,25 @@
+import assert from 'node:assert/strict';
+import fs from 'node:fs';
+import {createRequire} from 'node:module';
+const require=createRequire(import.meta.url);
+const ts=require('../../frontend/node_modules/typescript');
+const source=fs.readFileSync(new URL('../../frontend/src/lib/course-visual-context.ts',import.meta.url),'utf8');
+const compiled=ts.transpileModule(source,{compilerOptions:{module:ts.ModuleKind.ESNext,target:ts.ScriptTarget.ES2022}}).outputText;
+const {initialCourseRun,inCourseContext,CourseContextChanged}=await import('data:text/javascript;base64,'+Buffer.from(compiled).toString('base64'));
+const items=[{id:22,file_id:7},{id:21,file_id:6},{id:20,file_id:7}];
+assert.equal(initialCourseRun(items,6),21);
+assert.equal(initialCourseRun(items,8),undefined);
+assert.equal(initialCourseRun([],6),undefined);
+assert.equal(initialCourseRun(items),22);
+assert.equal(initialCourseRun(items,6,20),20); // Caller must validate explicit record file before showing it.
+let epoch=1,finish;
+const delayed=inCourseContext(()=>new Promise(resolve=>{finish=resolve;}),()=>epoch);
+epoch=2;finish('old-course-response');
+await assert.rejects(delayed,CourseContextChanged);
+let fail;
+const lateError=inCourseContext(()=>new Promise((_,reject)=>{fail=reject;}),()=>epoch);
+epoch=3;fail(new Error('old-course-error'));
+await assert.rejects(lateError,CourseContextChanged);
+assert.equal(await inCourseContext(async()=> 'current-course-response',()=>epoch),'current-course-response');
+await assert.rejects(inCourseContext(async()=>{throw new Error('current-error');},()=>epoch),/current-error/);
+console.log('9 context selection/async boundary checks passed; no network or model calls');

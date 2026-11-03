@@ -1,0 +1,27 @@
+import assert from 'node:assert/strict';
+import fs from 'node:fs';
+import {createRequire} from 'node:module';
+const require=createRequire(import.meta.url),ts=require('../../frontend/node_modules/typescript');
+const source=fs.readFileSync(new URL('../../frontend/src/lib/course-library-draft-flow.ts',import.meta.url),'utf8');
+const compiled=ts.transpileModule(source,{compilerOptions:{module:ts.ModuleKind.ESNext,target:ts.ScriptTarget.ES2022}}).outputText;
+const {defaultSamplePages,parseSamplePages,scopedDraftRequest}=await import('data:text/javascript;base64,'+Buffer.from(compiled).toString('base64'));
+assert.equal(defaultSamplePages(94),'1, 2, 3, 4, 5, 6, 7, 8, 9');
+assert.equal(defaultSamplePages(3),'1, 2, 3');
+assert.equal(defaultSamplePages(1),'1');
+assert.equal(defaultSamplePages(null),'1, 2, 3, 4, 5, 6, 7, 8, 9');
+const pages=parseSamplePages(defaultSamplePages(9),9);
+assert.deepEqual(pages,[1,2,3,4,5,6,7,8,9]);
+for(const value of ['', '0', '1,1', '1.5', '1,2,3,4,5,6,7,8,9,10'])assert.throws(()=>parseSamplePages(value,9));
+assert.throws(()=>parseSamplePages('1,4',3));
+const recipe={revision_id:370,pages,mode:'ai',instruction:'一个具体学习问题',brand_id:'xingtu'};
+const plan={file_id:18380,source:{revision_id:370,preview_brand:{id:'xingtu',name:'星途留学'}},mode:'ai',instruction:recipe.instruction,pages:pages.map(page=>({page,text:'bounded synthetic text'})),model:{configured:true},plan_digest:'a'.repeat(64)};
+const request=scopedDraftRequest(18380,recipe,plan,'same-attempt');
+assert.equal(request.external_consent,true);
+assert.equal(request.plan_digest,plan.plan_digest);
+assert.equal(request.request_key,'same-attempt');
+for(const changed of [{brand_id:''},{brand_id:'wenguo'},{revision_id:371},{pages:[2,1]},{mode:'local'},{instruction:'changed scope'}])
+  assert.throws(()=>scopedDraftRequest(18380,{...recipe,...changed},plan,'no-send'));
+assert.throws(()=>scopedDraftRequest(99,recipe,plan,'no-send'));
+assert.throws(()=>scopedDraftRequest(18380,recipe,{...plan,model:{configured:false}},'no-send'));
+assert.equal(scopedDraftRequest(18380,{...recipe,mode:'local'},{...plan,mode:'local',model:null},'local').external_consent,false);
+console.log('Nine-page defaults, short PDFs, page bounds and exact one-click generation scope passed; no HTTP or model calls.');

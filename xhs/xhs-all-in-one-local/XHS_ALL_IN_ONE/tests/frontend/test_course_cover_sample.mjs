@@ -1,0 +1,45 @@
+import assert from 'node:assert/strict';
+import fs from 'node:fs';
+import {createRequire} from 'node:module';
+const require=createRequire(import.meta.url),ts=require('../../frontend/node_modules/typescript');
+const compile=s=>ts.transpileModule(s,{compilerOptions:{module:ts.ModuleKind.ESNext,target:ts.ScriptTarget.ES2022}}).outputText;
+const moduleFrom=async s=>import('data:text/javascript;base64,'+Buffer.from(compile(s)).toString('base64'));
+const helpers=await moduleFrom(fs.readFileSync(new URL('../../frontend/src/lib/course-cover-sample.ts',import.meta.url),'utf8'));
+const tests=[];function test(name,fn){fn();tests.push(name);}
+const {coverSamplePage,coverSampleIssue}=helpers;
+test('a legacy plan retains its first valid body page without materializing a new cover field',()=>{const p={sample_pages:[1,7,3]},before=structuredClone(p);assert.equal(coverSamplePage(p,20),7);assert.equal(coverSampleIssue(p,20),'');assert.deepEqual(p,before);assert.equal('cover_sample_page' in p,false);});
+test('an explicit body page takes precedence over legacy and inner selection',()=>{assert.equal(coverSamplePage({cover_sample_page:5,sample_pages:[2,3]},20),5);});
+test('null keeps the legacy fallback',()=>{assert.equal(coverSamplePage({cover_sample_page:null,sample_pages:[1,4]},20),4);});
+for(const invalid of [1,0,-2,2.5,NaN,Infinity,21])test(`invalid explicit ${invalid} never silently falls back to a different page`,()=>{const p={template_id:'sample-led',cover_sample_page:invalid,sample_pages:[2]};assert.equal(coverSamplePage(p,20),null);assert.match(coverSampleIssue(p,20),/用这一页作封面样张/);});
+test('a cover-only source gives a material-specific explanation',()=>{assert.match(coverSampleIssue({template_id:'sample-led',sample_pages:[1]},1),/没有可选的正文页/);});
+for(const template_id of [undefined,'legacy'])test(`a ${template_id??'missing-template'} legacy plan permits a cover-only PDF without requesting a nonexistent body`,()=>{assert.equal(coverSampleIssue({template_id,sample_pages:[1]},1),'');});
+const previewUrl=new URL('../../frontend/src/components/course-pdf-inline-preview.tsx',import.meta.url),previewSource=fs.readFileSync(previewUrl,'utf8'),previewTree=ts.createSourceFile(previewUrl.pathname,previewSource,ts.ScriptTarget.Latest,true,ts.ScriptKind.TSX);
+const preview=previewTree.statements.find(n=>ts.isFunctionDeclaration(n)&&n.name?.text==='PdfPages');
+const select=preview.body.statements.find(n=>ts.isFunctionDeclaration(n)&&n.name?.text==='selectCurrentPage').getText(previewTree);
+const {choose}=await moduleFrom(`export function choose(d){const {onSelectPage,busy,error,src,loadedPage,page,selectionDisabled,count,minPage}=d;${select};selectCurrentPage();}`);
+const fixture=override=>{const selected=[];const d={onSelectPage:p=>selected.push(p),busy:false,error:'',src:'blob:local-watermarked-preview',loadedPage:5,page:5,selectionDisabled:false,count:20,minPage:2,...override};return {selected,d};};
+test('the actual preview handler selects only the page whose real preview finished loading',()=>{const f=fixture({});choose(f.d);assert.deepEqual(f.selected,[5]);});
+for(const [name,override] of Object.entries({loading:{busy:true},read_error:{error:'source changed'},no_preview:{src:''},old_page_preview:{loadedPage:4},blocked_edit:{selectionDisabled:true},unknown_count:{count:null},first_page:{loadedPage:1,page:1},out_of_range:{loadedPage:21,page:21}}))test(`the actual selection handler refuses ${name}`,()=>{const f=fixture(override);choose(f.d);assert.deepEqual(f.selected,[]);});
+const pageUrl=new URL('../../frontend/src/pages/platforms/xhs/course-visual-workflow-page.tsx',import.meta.url),source=fs.readFileSync(pageUrl,'utf8'),tree=ts.createSourceFile(pageUrl.pathname,source,ts.ScriptTarget.Latest,true,ts.ScriptKind.TSX),page=tree.statements.find(n=>ts.isFunctionDeclaration(n)&&n.name?.text==='CourseVisualWorkflowPage');
+function walk(n,visit){visit(n);ts.forEachChild(n,c=>walk(c,visit));}
+const elements=[];walk(page,n=>{if(ts.isJsxElement(n)||ts.isJsxSelfClosingElement(n))elements.push(n);});
+const open=n=>ts.isJsxElement(n)?n.openingElement:n,attr=(n,k)=>open(n).attributes.properties.find(p=>p.name?.getText(tree)===k)?.initializer;
+const picker=elements.find(n=>open(n).tagName.getText(tree)==='section'&&attr(n,'id')?.text==='vd-cover-sample-picker');assert.ok(picker);
+const control=elements.find(n=>open(n).tagName.getText(tree)==='CoursePdfInlinePreview');assert.ok(control);
+test('the picker uses the existing authenticated exact-version preview, with compact 240px output and page 2 minimum',()=>{assert.equal(attr(control,'fileId').expression.getText(tree),'run.file_id');assert.equal(attr(control,'revisionId').expression.getText(tree),'run.data.source.revision_id');assert.equal(attr(control,'minPage').expression.getText(tree),'2');assert.ok(open(control).attributes.properties.some(p=>p.name?.getText(tree)==='compact'));assert.ok(previewSource.includes('maxWidth:compact?240:420'));assert.ok(picker.getText(tree).includes('用这一页作封面样张'));});
+const changePlan=page.body.statements.find(n=>ts.isFunctionDeclaration(n)&&n.name?.text==='changePlan').getText(tree);
+const {selectCover}=await moduleFrom(`export function selectCover(input,value){const {busy,bufferConflict,briefDirty,setPlan,setChecks}=input;${changePlan};const select=${attr(control,'onSelectPage').expression.getText(tree)};select(value);}`);
+test('selection edits only the cover field and preserves legacy sample pages plus unrelated content',()=>{let plan={sample_pages:[1],method_text:'Retained method'},inner={sample_pages:[7,8]},checks=[];const before=structuredClone(inner);selectCover({busy:'',bufferConflict:null,briefDirty:false,setPlan:update=>{plan=update(plan);},setChecks:x=>checks.push(x)},5);assert.deepEqual(plan,{sample_pages:[1],method_text:'Retained method',cover_sample_page:5});assert.deepEqual(inner,before);assert.deepEqual(checks,[{}]);});
+test('selection stays guarded by busy, conflict and single-image edits',()=>{for(const o of [{busy:'rendering'},{bufferConflict:{}},{briefDirty:true}]){const writes=[];selectCover({busy:'',bufferConflict:null,briefDirty:false,setPlan:x=>writes.push(x),setChecks:x=>writes.push(x),...o},5);assert.deepEqual(writes,[]);}});
+test('missing-selection feedback has a visible focus target and the primary action tells the user what to select',()=>{assert.equal(attr(picker,'tabIndex').expression.getText(tree),'-1');assert.ok(source.includes("panel?.focus({preventScroll:true})"));assert.ok(source.includes("setProductionOptions(['options'])"));});
+test('the unified production action retains legacy cover validation and its actionable picker',()=>{
+ const action=page.body.statements.find(n=>ts.isFunctionDeclaration(n)&&n.name?.text==='startProduction').getText(tree);
+ assert.ok(action.includes('coverSampleIssue(plan,run.data.source.page_count)'));
+ assert.ok(action.includes("setProductionOptions(['options'])"));
+ const render=page.body.statements.find(n=>ts.isFunctionDeclaration(n)&&n.name?.text==='saveAndRender').getText(tree);
+ assert.ok(render.includes('if(!requireCoverSample())return'));
+ const warning=elements.find(n=>open(n).tagName.getText(tree)==='Alert'&&attr(n,'message')?.expression?.getText(tree).includes('这份PDF只有封面，可保留原版式制作'));assert.ok(warning);
+ const message=Function('coverSelectionIssue',`return (${attr(warning,'message').expression.getText(tree)});`)('');assert.match(message,/可保留原版式制作/);
+});
+await test('A knowledge cover does not require a decorative PDF sample selection',()=>{assert.equal(coverSampleIssue({template_id:'magazine-a',sample_pages:[1]},44),'');assert.equal(coverSampleIssue({template_id:'magazine-a',sample_pages:[]},1),'');});
+console.log(JSON.stringify({passed:tests.length,tests,network_calls:0,model_calls:0,business_writes:0},null,2));

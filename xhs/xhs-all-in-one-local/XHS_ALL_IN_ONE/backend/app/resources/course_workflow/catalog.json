@@ -1,0 +1,112 @@
+{
+  "version": "2026.10.30.3",
+  "skills": [
+    {
+      "skill": "aussie-course-xhs",
+      "file": "skills/aussie-course-xhs/SKILL.md",
+      "sha256": "a492e2a1f0f490e49aec8fa60480b0d2a6c47a4e17244d84bab533b43279574b"
+    },
+    {
+      "skill": "aussie-course-xhs",
+      "file": "skills/aussie-course-xhs/references/topics.md",
+      "sha256": "e50c5704c05c505d0bc5899eddaca6bc86fa070524534f839868944027ea34c8"
+    },
+    {
+      "skill": "aussie-course-xhs",
+      "file": "skills/aussie-course-xhs/references/writing.md",
+      "sha256": "2f97008281ec6ab3b8dc97e6da051939b692ed5698de0dd825edb25a20ada43a"
+    },
+    {
+      "skill": "aussie-course-xhs",
+      "file": "skills/aussie-course-xhs/references/editorial.md",
+      "sha256": "0059db3b2fcb27d1b535bf149e3edf827318c02f5a9d41d79f3a1c020793f3b1"
+    },
+    {
+      "skill": "aussie-course-xhs",
+      "file": "skills/aussie-course-xhs/references/visuals.md",
+      "sha256": "27774846301d6ae8821369d2cbee296257a7ea0c506ca45f9bd6a23f3bd3f0ff"
+    },
+    {
+      "skill": "aussie-course-xhs",
+      "file": "skills/aussie-course-xhs/references/product-showcase.md",
+      "sha256": "743afc44fe47a8b83ba881b06690322d28c9d72094301299fbffd1809f528525"
+    },
+    {
+      "skill": "xhs-visual-director",
+      "file": "skills/xhs-visual-director/SKILL.md",
+      "sha256": "cc85ce9a3b21e3cfeb0d874fe007e05a66561c94f004896f96a012f4acc16595"
+    },
+    {
+      "skill": "xhs-visual-director",
+      "file": "skills/xhs-visual-director/docs/visual_consistency_protocol.md",
+      "sha256": "db53c242982a2a66af006f6d7416f22547becb081f58928b887b981e66b3d87e"
+    },
+    {
+      "skill": "xhs-visual-director",
+      "file": "skills/xhs-visual-director/docs/page_structure_rules.md",
+      "sha256": "029201a935e40cb3e05e58779755992ca14fa381cc6cc17aef0d653dc56fa987"
+    },
+    {
+      "skill": "xhs-visual-director",
+      "file": "skills/xhs-visual-director/templates/visual_review_checklist.md",
+      "sha256": "71c7d834692a276cb7e5717512a4f576b7c064ec84240b1588717e8cb7171410"
+    },
+    {
+      "skill": "xhs-visual-director",
+      "file": "skills/xhs-visual-director/docs/style_system.md",
+      "sha256": "21d3f37e87a7a4f8068b83aee34b858c9fe4d444ea414c7b4ddc891e0f7bcc3b"
+    },
+    {
+      "skill": "xhs-visual-director",
+      "file": "skills/xhs-visual-director/docs/prompt_rules.md",
+      "sha256": "da5ca69a44a4b73d93ca5df33121ca5ebc660745cd7478276b337c69be3cf667"
+    },
+    {
+      "skill": "xhs-visual-director",
+      "file": "skills/xhs-visual-director/docs/anti_patterns.md",
+      "sha256": "fa3861b50c2c2d045c9cf486cbe2796f3ad0f1ee462d7dd8fb8bf733f342eeef"
+    },
+    {
+      "skill": "xhs-visual-director",
+      "file": "skills/xhs-visual-director/templates/image_prompt_template.md",
+      "sha256": "31153f5b31a8f9a6f774130d9b058daf944aab28e63c3dbd7933af03beb77840"
+    }
+  ],
+  "brand": {
+    "id": "xingtu",
+    "name": "星途留学",
+    "logo": "xingtu-logo.jpg",
+    "logo_sha256": "810b66075fd4b439b5eb0f6465839eafe51c850dbb51ed859667797ae2f0a82f",
+    "palette": {
+      "background": "#FFFFFF",
+      "blue": "#0755A2",
+      "ink": "#172F47",
+      "orange": "#F58A25"
+    },
+    "width": 1080,
+    "height": 1440
+  },
+  "approved_display": {
+    "source_sha256": "521d33bfd0bfbd5cca206662354c0d3c2cc59cf36683bb746d37811ecc92df95",
+    "assets": {
+      "1": {
+        "file": "display/1.png",
+        "sha256": "a2cd249b23dda4099678059c816ee5af6566f8f72eed9ea68f92dc1657bb162b"
+      },
+      "22": {
+        "file": "display/22.png",
+        "sha256": "ad6bd2b0cd4ae07cc35e75d80d6c1f7f568247af2dc027ce03133c80e234ead2"
+      },
+      "58": {
+        "file": "display/58.png",
+        "sha256": "f010567c9e26712d7e0c72303445b33f1ce02c10507e5699d6100e22b3f85118"
+      }
+    },
+    "treatment": "已核验展示副本省略独立校徽页眉图；正文、公式和原页码保持，原PDF未改。"
+  },
+  "responsibilities": {
+    "copy": "aussie-course-xhs/topics+writing+editorial",
+    "visual": "xhs-visual-director/template+master+review",
+    "templates": "question-led/decision-map/sample-led; legacy retains old rendering"
+  }
+}

@@ -1,0 +1,22 @@
+import assert from 'node:assert/strict';
+import fs from 'node:fs';
+import {createRequire} from 'node:module';
+const require=createRequire(import.meta.url),ts=require('../../frontend/node_modules/typescript');
+const source=fs.readFileSync(new URL('../../frontend/src/lib/xianyu-publish-readiness.ts',import.meta.url),'utf8');
+const compiled=ts.transpileModule(source,{compilerOptions:{module:ts.ModuleKind.ESNext,target:ts.ScriptTarget.ES2022}}).outputText;
+const {xianyuPreviewBlockReason:reason}=await import('data:text/javascript;base64,'+Buffer.from(compiled).toString('base64'));
+const ready={enabled:true,dirty:false,busy:false,accountId:'synthetic-account',price:'189.00'};
+assert.equal(reason(ready),'');
+assert.equal(reason({...ready,publishing_supported:false}),''); // Source verification happens when opening, not a false connection warning.
+assert.match(reason({...ready,enabled:false,unavailableReason:'独立服务未连接'}),/独立服务未连接/);
+assert.match(reason({...ready,enabled:false,unavailableReason:'手动发布未启用'}),/手动发布未启用/);
+assert.match(reason({...ready,dirty:true}),/先保存/);
+assert.match(reason({...ready,busy:true}),/正在读取/);
+assert.match(reason({...ready,accountId:null}),/关联闲鱼账号/);
+for(const price of [null,'','0','-1','NaN','Infinity'])assert.match(reason({...ready,price}),/正数售价/);
+for(const jobState of ['uploading','submitting','unknown','accepted','succeeded'])assert.ok(reason({...ready,jobState}));
+assert.equal(reason({...ready,jobState:'failed'}),'');
+const panel=fs.readFileSync(new URL('../../frontend/src/pages/platforms/xianyu/xianyu-publish-panel.tsx',import.meta.url),'utf8');
+assert.ok(panel.indexOf("base+'/publish-source'")<panel.indexOf('if(r.options)'));
+assert.ok(!panel.includes('确认发布 · 星途留学 MKTG1501'));
+console.log('Preview connection, saved edits, account, price, result locking, source preparation and course identity passed.');

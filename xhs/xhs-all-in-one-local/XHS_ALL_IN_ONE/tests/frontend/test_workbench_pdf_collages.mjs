@@ -1,0 +1,17 @@
+import assert from 'node:assert/strict';
+import fs from 'node:fs';
+import {createRequire} from 'node:module';
+const require=createRequire(import.meta.url),ts=require('../../frontend/node_modules/typescript');
+const source=fs.readFileSync(new URL('../../frontend/src/pages/platforms/xhs/course-visual-workflow-page.tsx',import.meta.url),'utf8');
+const raw=fs.readFileSync(new URL('../../frontend/src/lib/course-pdf-collage.ts',import.meta.url),'utf8');
+const compiled=ts.transpileModule(raw,{compilerOptions:{module:ts.ModuleKind.ESNext,target:ts.ScriptTarget.ES2022}}).outputText;
+const {defaultPdfCollagePlan,pdfCollageIssue}=await import('data:text/javascript;base64,'+Buffer.from(compiled).toString('base64'));
+assert.deepEqual(defaultPdfCollagePlan(),{groups:[[2,3,4,5],[6,7,8,9]]});
+assert.equal(pdfCollageIssue(defaultPdfCollagePlan(),18),'');
+assert.ok(source.includes("asset.kind==='collage'?'四宫格真实样张'"));
+assert.ok(source.includes("asset.source_pages.join('、')"));
+assert.ok(source.includes("asset.kind==='collage'||asset.kind==='pdf-page'"));
+assert.ok(source.includes('collagePlan:b.collagePlan'),'Old unsaved collage selections stay recoverable in the edit buffer');
+assert.equal(source.includes('CoursePdfCollagePanel'),false,'The live workbench no longer promotes the superseded two-collage editor');
+assert.ok(source.includes('CoursePdfPagesPanel'));
+console.log(JSON.stringify({passed:8,legacy_output_retained:true,main_workflow:'eight_standalone_pdf_pages',network_calls:0,business_writes:0}));

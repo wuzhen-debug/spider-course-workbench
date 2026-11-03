@@ -1,0 +1,3 @@
+[submodule "xianyu-upstream"]
+	path = xianyu/xianyu-auto-reply-local/source
+	url = https://github.com/zhinianboke/xianyu-auto-reply.git

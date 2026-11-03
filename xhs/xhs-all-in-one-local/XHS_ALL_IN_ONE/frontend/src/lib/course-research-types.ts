@@ -1,0 +1,14 @@
+export type ResearchContext = {university:string;course_code:string;course_name:string;term:string;library_directory:string;course_directory?:string;course_id?:number|null};
+export type ResearchMaterial = {id:number;filename:string;material_type:string;relative_path:string;revision_id:number};
+export type ResearchComment = {comment_id:string;content:string;like_count:number|null;parent_comment_id?:string|null;manually_entered?:boolean};
+export type EvidenceReview = {source_count:number;detail_count:number;comments_read:number;limited:boolean;message:string};
+export type ResearchSource = {id:string;excluded?:boolean;source_kind:"xhs"|"web";source_url:string;note_id:string;title:string;content:string;content_status:string;author_name?:string;cover_url?:string;observed_at:string;keywords:string[];metrics:{likes:number|null;collects:number|null;comments:number|null};comments:ResearchComment[];detail_error?:string;comments_error?:string;comments_observed_at?:string};
+export type ResearchQuestion = {question:string;category:string;source_id:string;source_url:string;comment_id:string};
+export type ResearchAngle = {topic:string;basis:string;source_ids:string[];category:string};
+export type ResearchPattern = {source_id:string;title_methods:string[];opening:string;structure:string;visual:string};
+export type ResearchSearch = {source:string;keyword:string;page:number;sort:number;at:string;status:string;returned:number;has_more?:boolean;error?:string};
+export type ResearchDraft = {id:number;research_id:number;title:string;body:string;tags:string[];mode:string;status:string;draft_id:number|null;draft_available?:boolean;prompt:string;brief:{sources:ResearchSource[];[key:string]:unknown};created_at:string;reviewed_at:string|null;review_digest:string;publishing_enabled:false};
+export type ResearchWorkspace = {id:number;context:ResearchContext;evidence:ResearchSource[];searches:ResearchSearch[];analysis:{question_count:number;questions:ResearchQuestion[];angles:ResearchAngle[];reference_patterns:ResearchPattern[];notes_with_detail:number;comments_read:number;scope_note:string};drafts:ResearchDraft[];created_at:string;updated_at:string};
+export type ResearchHistory = {id:number;context:ResearchContext;source_count:number;updated_at:string};
+export type WritingOptions = {topic:string;selected_ids:string[];purpose:"learning"|"product";brand:string;facts:string;instruction:string;material_ids:number[]};
+export type WritingPlan = {research_id:number;options:WritingOptions;prompt:string;model:{name:string;model_name:string;destination:string;configured:boolean}|null;materials:{file_id:number;source:{filename:string;sha256:string};pages:{page:number;text:string}[]}[];source_ids:string[];source_count:number;comments_count:number;external_scope:string;characters:number;plan_digest:string;publishing_enabled:false};

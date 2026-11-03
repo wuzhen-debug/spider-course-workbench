@@ -1,0 +1,28 @@
+import assert from 'node:assert/strict';
+import fs from 'node:fs';
+import {createRequire} from 'node:module';
+const require=createRequire(import.meta.url),ts=require('../../frontend/node_modules/typescript');
+const source=fs.readFileSync(new URL('../../frontend/src/lib/course-creations.ts',import.meta.url),'utf8');
+const compiled=ts.transpileModule(source,{compilerOptions:{module:ts.ModuleKind.ESNext,target:ts.ScriptTarget.ES2022}}).outputText;
+const {libraryFolderParams,libraryResearchParams,positiveRouteId,researchEntryMatches}=await import('data:text/javascript;base64,'+Buffer.from(compiled).toString('base64'));
+const old=new URLSearchParams('library_dir=02墨大/MAST10007&library_view=research&research_id=2&research_draft_id=2&file_id=7&library_file_id=7&package_id=1&research_lane=pdf&pdf_run=31');
+const next=libraryFolderParams(old,'02墨大/FNCE10002');
+assert.equal(next.get('library_dir'),'02墨大/FNCE10002');
+for(const key of ['research_id','research_draft_id','file_id','library_file_id','package_id','library_view','research_lane','pdf_run'])assert.equal(next.has(key),false);
+assert.equal(old.get('research_id'),'2'); // Cleaning a destination must not mutate browser history.
+const research=libraryResearchParams(old,{id:19901,relative_path:'02墨大/FNCE10002/期末复习讲义/real.pdf'});
+assert.equal(research.get('library_dir'),'02墨大/FNCE10002/期末复习讲义');
+assert.equal(research.get('library_view'),'research');assert.equal(research.get('file_id'),'19901');
+assert.equal(research.has('research_id'),false);assert.equal(research.has('research_draft_id'),false);
+assert.equal(libraryFolderParams(old,'').has('library_dir'),false);
+const preview=new URLSearchParams('library_file_id=19901&package_id=3');
+const restored=new URLSearchParams(preview.toString());
+assert.equal(positiveRouteId(restored.get('library_file_id')),19901);assert.equal(positiveRouteId(restored.get('package_id')),3);
+for(const invalid of [null,'','0','-1','1x','1.2','9007199254740992'])assert.equal(positiveRouteId(invalid),null);
+const fnce={university:'墨尔本大学',course_code:'FNCE10002'};
+assert.equal(researchEntryMatches({university:'',course_code:''},fnce),true);
+assert.equal(researchEntryMatches({university:'墨尔本大学',course_code:''},fnce),true);
+assert.equal(researchEntryMatches({university:'悉尼大学',course_code:'FNCE10002'},fnce),false);
+assert.equal(researchEntryMatches({university:'墨尔本大学',course_code:'MAST10007'},fnce),false);
+assert.equal(researchEntryMatches(fnce,undefined),false);
+console.log('Course creation navigation: cross-course cleanup, literal paths, refreshable IDs and invalid targets passed. No API, AI or publication calls.');

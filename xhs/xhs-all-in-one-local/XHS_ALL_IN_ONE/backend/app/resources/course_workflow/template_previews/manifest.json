@@ -1,0 +1,39 @@
+{
+  "question-led": {
+    "sha256": "033da98d54c74dcf2281affb540e2ce198471b3eec45aeca7f56b742771fcbb1",
+    "source_sha256": "7042881a5db2a72ce439ee703a3166e93ee12f9918bde497d770957775b22da6",
+    "source_pages": [
+      23,
+      24
+    ],
+    "example_course": "FNCE10002",
+    "status": "template_comparison_not_approved"
+  },
+  "decision-map": {
+    "sha256": "e6b8f4ec012f83eef4554fd643b80ffc3455d95aecc5093213da2e14507fb6b3",
+    "source_sha256": "7042881a5db2a72ce439ee703a3166e93ee12f9918bde497d770957775b22da6",
+    "source_pages": [
+      23,
+      24
+    ],
+    "example_course": "FNCE10002",
+    "status": "template_comparison_not_approved"
+  },
+  "sample-led": {
+    "sha256": "44f0653a1690aeb6fa41b4d322c6fbb1c642a6c5b417bd14eb742a9cb20ff969",
+    "source_sha256": "7042881a5db2a72ce439ee703a3166e93ee12f9918bde497d770957775b22da6",
+    "source_pages": [
+      23,
+      24
+    ],
+    "example_course": "FNCE10002",
+    "status": "template_comparison_not_approved"
+  },
+  "magazine-a": {
+    "sha256": "c86d31909976e1ae4e3d0e05f9c30b3f59ddebec50cfc8695115bebfb1ef928c",
+    "source_pdf_sha256": "4e22e39557dd9120092c9db25a0a38b599fb793a15173ebdbd6fab122e610a13",
+    "example_course": "ACC1001",
+    "status": "style_selected_by_user_final_content_pending_review",
+    "original_example_unchanged": true
+  }
+}

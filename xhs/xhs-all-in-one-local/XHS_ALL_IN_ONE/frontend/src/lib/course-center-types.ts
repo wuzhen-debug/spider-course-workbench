@@ -1,0 +1,9 @@
+export type CourseCapabilities = { enabled: boolean; demo_only: boolean; external_actions_enabled: boolean; can_publish: boolean; can_run_automation: boolean };
+export type Course = { id: number; university: string; course_code: string; course_name: string; term: string; language: string; aliases: string[]; exam_date: string | null; source_reference: string; priority: string; notes: string; archived: boolean; is_demo: boolean; product_count: number; link_count: number };
+export type CourseProduct = { id: number; course_id: number; title: string; material_type: string; coverage: string; owner: string; listing_status: string; notes: string };
+export type CourseVersion = { id: number; product_id: number; version: string; language: string; source_reference: string; sha256: string; file_status: string; qa_status: string; notes: string };
+export type CourseAsset = { id: number; course_id: number; version_id: number | null; title: string; asset_kind: string; reference: string; source_notes: string; page_reference: string; watermarked: boolean; rights_confirmed: boolean; usage_status: string };
+export type CourseContent = { id?: number; target_kind?: string; target_is_demo?: boolean; title: string; body: string; status: string; source_available: boolean; source_hint?: string; is_demo: boolean; linked_count?: number };
+export type CourseLink = { id: number; version_id: number | null; target_kind: string; target_id: number; target_is_demo: boolean; notes: string; content: CourseContent };
+export type CourseWorkspace = { course: Course; products: CourseProduct[]; versions: CourseVersion[]; assets: CourseAsset[]; links: CourseLink[] };
+export type CourseList = { items: Course[]; total: number; page: number; page_size: number };
